@@ -1,0 +1,5 @@
+Migrations for 'sklep':
+  sklep\migrations\0001_initial.py
+    + Create model Category
+    + Create model Product
+    + Create model ProductVariant
