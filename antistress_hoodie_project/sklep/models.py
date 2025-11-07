@@ -1,14 +1,12 @@
 from django.db import models
 
-from django.db import models
 
-# Lista wyboru popularnych kolorów
 COLORS = (
     ('BLK', 'Black'),
     ('GRY', 'Gray'),
     ('NVY', 'Navy'),
     ('WHT', 'White'),
-    ('AUT', 'Warm autumn beige'),
+    ('PNK', 'Pink'),
 )
 
 SIZES = (
@@ -19,18 +17,27 @@ SIZES = (
     ('XL', 'Extra Large'),
 )
 
+STYLES = (
+    ('F', 'Female'),
+    ('U', 'Unisex'),
+)
+
+GENDERS = models.IntegerChoices(
+    'Gender',
+    'Female Male Other'
+)
+
 
 class Category(models.Model):
     name = models.CharField(max_length=50, unique=True, verbose_name="Category")
-    slug = models.SlugField(unique=True, help_text="Short description of the cut")
     description = models.TextField(
         blank=True,
-        help_text="Krótki opis kategorii, widoczny na stronie kategorii."
+        help_text="Short category description, visible on the category page"
     )
-    is_active = models.BooleanField(default=True, verbose_name="Czy aktywna w sklepie")
+    is_active = models.BooleanField(default=True, verbose_name="Visible in the shop?")
 
     class Meta:
-        verbose_name_plural = "Kategorie"
+        verbose_name_plural = "Categories"
         ordering = ['name']
 
     def __str__(self):
@@ -38,70 +45,93 @@ class Category(models.Model):
 
 
 class Product(models.Model):
-    """Model reprezentujący podstawowy produkt (Antistress Hoodie)."""
-    name = models.CharField(max_length=100, verbose_name="Nazwa Produktu")
+    name = models.CharField(max_length=100, verbose_name="Product name")
     category = models.ForeignKey(
         Category,
         null=True,
         blank=True,
         on_delete=models.SET_NULL,
-        verbose_name="Kategoria"
+        verbose_name="Category"
     )
-    description = models.TextField(help_text="Pełny opis produktu i jego 'antystresowych' cech.")
+    description = models.TextField(help_text="Complete product description")
     material = models.CharField(
         max_length=50,
-        default="Bawełna organiczna",
-        help_text="Główny materiał wykonania bluzy."
+        default="Organic cotton",
+        help_text="Main product material/fabric"
     )
     base_price = models.DecimalField(
         max_digits=6,
         decimal_places=2,
-        help_text="Podstawowa cena sugerowana (warianty mogą mieć inną)."
+        help_text="Base price"
     )
-    is_featured = models.BooleanField(default=False, verbose_name="Wyróżniony na stronie głównej")
+    is_featured = models.BooleanField(default=False, verbose_name="Featured on the main page?")
     
     class Meta:
-        verbose_name = "Produkt"
-        verbose_name_plural = "Produkty"
+        verbose_name = "Product"
+        verbose_name_plural = "Products"
 
     def __str__(self):
         return self.name
 
 
 class ProductVariant(models.Model):
-    """Model reprezentujący konkretny wariant produktu (np. L, Czarny)."""
     product = models.ForeignKey(
         Product,
         on_delete=models.CASCADE,
         related_name='variants',
-        verbose_name="Produkt Matka"
+        verbose_name="Product parent"
     )
-    color = models.CharField(max_length=3, choices=COLORS, default='BLK', verbose_name="Kolor")
-    size = models.CharField(max_length=3, choices=SIZES, default='M', verbose_name="Rozmiar")
+    color = models.CharField(max_length=3, choices=COLORS, default='BLK', verbose_name="Color")
+    size = models.CharField(max_length=3, choices=SIZES, default='M', verbose_name="Size")
+    style = models.CharField(max_length=3, choices=STYLES, default='U', verbose_name="Style/cut")
     sku = models.CharField(
         max_length=20,
         unique=True,
-        help_text="Unikalny kod magazynowy (Stock Keeping Unit)."
+        help_text="Catalogue number (SKU)"
     )
-    stock_quantity = models.PositiveIntegerField(default=0, verbose_name="Stan Magazynowy")
+    stock_quantity = models.PositiveIntegerField(default=0, verbose_name="Stock quantity")
     price_override = models.DecimalField(
         max_digits=6,
         decimal_places=2,
         null=True,
         blank=True,
-        help_text="Jeśli puste, używa ceny podstawowej produktu."
+        help_text="If empty, uses base price"
     )
 
     class Meta:
-        unique_together = ('product', 'color', 'size')
-        verbose_name = "Wariant Produktu"
-        verbose_name_plural = "Warianty Produktu"
+        unique_together = ('product', 'color', 'size', 'style')
+        verbose_name = "Product variant"
+        verbose_name_plural = "Product variants"
 
     def get_price(self):
-        """Zwraca rzeczywistą cenę wariantu."""
         return self.price_override if self.price_override is not None else self.product.base_price
 
     def __str__(self):
         color_display = dict(COLORS).get(self.color)
         size_display = dict(SIZES).get(self.size)
-        return f"{self.product.name} - {size_display}, {color_display}"
+        style_display = dict(STYLES).get(self.style)
+        return f"{self.product.name} - {size_display}, {color_display}, {style_display}"
+    
+
+class Position(models.Model):  
+    name = models.CharField(max_length=70, blank=False, null=False)
+    description = models.TextField(blank = False, null = True)
+
+    def  __str__(self):
+        return f"{self.name}"
+
+class Person(models.Model):
+    name = models.CharField(max_length=50, blank=False, null=False)
+    surname =  models.CharField(max_length=100, blank=False, null=False)
+    gender = models.IntegerField(choices=GENDERS.choices, default=GENDERS.Female)
+    position = models.ForeignKey('Position', on_delete=models.CASCADE)
+    created = models.DateField(auto_now_add=True, editable=False)
+
+    class Meta:
+        verbose_name = "Person"
+        verbose_name_plural = "People"
+        ordering = ['surname']
+
+    def __str__(self):
+        return f"{self.name} {self.surname}"
+
