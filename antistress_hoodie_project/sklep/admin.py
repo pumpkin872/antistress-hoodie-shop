@@ -12,5 +12,3 @@ class PersonAdmin(admin.ModelAdmin):
     list_filter = ['position', 'created']
 
 admin.site.register(Person, PersonAdmin)
-
-  
