@@ -105,3 +105,5 @@ class PersonSerializer(serializers.ModelSerializer):
             raise serializers.ValidationError("Nazwisko musi zaczynać się wielką literą, a reszta liter musi być mała (np. 'Nowak').")
         
         return value
+    
+# http://127.0.0.1:8000/persons/?nazwisko=a
