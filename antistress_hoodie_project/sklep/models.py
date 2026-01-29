@@ -61,10 +61,9 @@ class Product(models.Model):
     )
     base_price = models.DecimalField(
         max_digits=6,
-        decimal_places=2,
-        help_text="Base price"
+        decimal_places=2
     )
-    is_featured = models.BooleanField(default=False, verbose_name="Featured on the main page?")
+    is_featured = models.BooleanField(default=False, verbose_name="Is featured on the main page?")
     
     class Meta:
         verbose_name = "Product"
