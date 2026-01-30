@@ -1,0 +1,14 @@
+{% extends "sklep\base.html" %}
+
+{% block title %}List of Person objects{% endblock %}
+
+{% block content %}
+Currently in my data base are these Person objects.
+{% for person in people %}
+<p>Person: {{ person.name }} {{ person.surname }}</p>
+<p>Gender: {{ person.gender }}</p>
+<p>Created on: {{ person.created }}</p>
+<p>Position: {{ person.position }}</p>
+<hr>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,12 @@
+{% extends "sklep\base.html" %}
+
+{% block title %}List of Position objects{% endblock %}
+
+{% block content %}
+Currently in my data base are these Position objects.
+{% for position in positions %}
+<p>Position: {{ position.name }}</p>
+<p>Description: {{ position.description }}</p>
+<hr>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,14 @@
+{% extends "sklep\base.html" %}
+
+{% block title %}Add new position{% endblock %}
+
+{% block content %}
+<h1>Add new person</h1>
+
+<form method="post">
+    {% csrf_token %}
+    {{ form.as_p }}
+    <button type="submit">Save</button>
+</form>
+<hr>
+{% endblock %}
